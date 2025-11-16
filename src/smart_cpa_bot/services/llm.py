@@ -79,8 +79,13 @@ class LLMService:
             choices = data.get("choices")
             if choices:
                 return choices[0]["message"].get("content", "").strip()
-            if data.get("message"):
-                return data["message"]
+            if "message" in data:
+                message = data["message"]
+                if isinstance(message, dict):
+                    return (message.get("content") or "").strip()
+                return str(message)
+            if "response" in data:  # some ollama responses
+                return str(data["response"]).strip()
         return "Готов помочь с подбором заданий и баллами."
 
     def violates_policy(self, text: str) -> bool:
