@@ -146,7 +146,7 @@ class ConversationService:
         return ConversationResponse(text="Готов продолжать, чем помочь?")
 
     async def _store_turn(self, user_id: int, role: str, content: str) -> None:
-        turn = DialogTurn(user_id=user_id, role=role, content=content)
+        turn = DialogTurn(user_id=user_id, role=role, content=str(content))
         self.session.add(turn)
         await self.session.flush()
 
