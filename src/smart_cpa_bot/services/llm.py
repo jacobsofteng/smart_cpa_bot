@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import json
 from typing import Iterable
 
 import httpx
@@ -55,7 +56,25 @@ class LLMService:
         except httpx.HTTPError as exc:  # pragma: no cover
             logger.error("LLM request failed: %s", exc)
             return "Немного перегружен. Попробуем ещё раз через минуту?"
-        data = response.json()
+        try:
+            data = response.json()
+        except ValueError:
+            text = response.text
+            parsed: dict | None = None
+            for line in text.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                if line.startswith("data:"):
+                    line = line[5:].strip()
+                try:
+                    parsed = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+            if not parsed:
+                logger.error("LLM response parse error: %s", text[:200])
+                return "Готов помочь с подбором заданий и баллами."
+            data = parsed
         if isinstance(data, dict):
             choices = data.get("choices")
             if choices:
