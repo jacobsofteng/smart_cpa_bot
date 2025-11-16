@@ -47,6 +47,7 @@ class LLMService:
             "temperature": settings.llm.temperature,
             "max_tokens": settings.llm.max_tokens,
             "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + list(messages),
+            "stream": False,
         }
         try:
             response = await self._client.post(self._endpoint, json=payload)
